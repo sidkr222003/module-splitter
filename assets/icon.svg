@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Main gradient for primary module blocks -->
+    <linearGradient id="blockGradBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0288D1;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="blockGradCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#80DEEA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00ACC1;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="blockGradTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4DB6AC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00796B;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter for the split line -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle drop shadow for depth -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Inner highlight gradient -->
+    <linearGradient id="highlightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.18" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </linearGradient>
+
+    <!-- Split arrow gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD54F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8F00;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="codeLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- ─── LEFT MODULE BLOCK ─── -->
+  <g filter="url(#shadow)">
+    <rect x="42" y="108" width="192" height="296" rx="20" ry="20" fill="url(#blockGradBlue)"/>
+    <!-- Inner highlight -->
+    <rect x="42" y="108" width="192" height="296" rx="20" ry="20" fill="url(#highlightGrad)"/>
+    <!-- Border -->
+    <rect x="42" y="108" width="192" height="296" rx="20" ry="20"
+          fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.5"/>
+  </g>
+
+  <!-- Left module: code lines (3 groups) -->
+  <!-- Header bar -->
+  <rect x="66" y="136" width="144" height="12" rx="6" fill="#ffffff" opacity="0.25"/>
+
+  <!-- Code line group 1 -->
+  <rect x="66" y="170" width="110" height="8" rx="4" fill="url(#codeLineGrad)"/>
+  <rect x="66" y="186" width="88" height="8" rx="4" fill="#ffffff" opacity="0.45"/>
+  <rect x="66" y="202" width="120" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+
+  <!-- Code line group 2 -->
+  <rect x="66" y="230" width="100" height="8" rx="4" fill="url(#codeLineGrad)"/>
+  <rect x="66" y="246" width="72" height="8" rx="4" fill="#ffffff" opacity="0.45"/>
+  <rect x="66" y="262" width="130" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+  <rect x="66" y="278" width="90" height="8" rx="4" fill="#ffffff" opacity="0.25"/>
+
+  <!-- Code line group 3 -->
+  <rect x="66" y="306" width="115" height="8" rx="4" fill="url(#codeLineGrad)"/>
+  <rect x="66" y="322" width="80" height="8" rx="4" fill="#ffffff" opacity="0.45"/>
+  <rect x="66" y="338" width="104" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+
+  <!-- Left module small tag label -->
+  <rect x="66" y="366" width="52" height="16" rx="8" fill="#ffffff" opacity="0.18"/>
+  <rect x="126" y="366" width="36" height="16" rx="8" fill="#ffffff" opacity="0.12"/>
+
+  <!-- ─── RIGHT MODULE BLOCK ─── -->
+  <g filter="url(#shadow)">
+    <rect x="278" y="108" width="192" height="136" rx="20" ry="20" fill="url(#blockGradCyan)"/>
+    <rect x="278" y="108" width="192" height="136" rx="20" ry="20" fill="url(#highlightGrad)"/>
+    <rect x="278" y="108" width="192" height="136" rx="20" ry="20"
+          fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.5"/>
+  </g>
+
+  <!-- Right top module: code lines -->
+  <rect x="302" y="136" width="144" height="12" rx="6" fill="#ffffff" opacity="0.25"/>
+  <rect x="302" y="168" width="112" height="8" rx="4" fill="url(#codeLineGrad)"/>
+  <rect x="302" y="184" width="86" height="8" rx="4" fill="#ffffff" opacity="0.45"/>
+  <rect x="302" y="200" width="124" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+
+  <!-- ─── RIGHT BOTTOM MODULE BLOCK ─── -->
+  <g filter="url(#shadow)">
+    <rect x="278" y="268" width="192" height="136" rx="20" ry="20" fill="url(#blockGradTeal)"/>
+    <rect x="278" y="268" width="192" height="136" rx="20" ry="20" fill="url(#highlightGrad)"/>
+    <rect x="278" y="268" width="192" height="136" rx="20" ry="20"
+          fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.5"/>
+  </g>
+
+  <!-- Right bottom module: code lines -->
+  <rect x="302" y="296" width="144" height="12" rx="6" fill="#ffffff" opacity="0.25"/>
+  <rect x="302" y="328" width="96" height="8" rx="4" fill="url(#codeLineGrad)"/>
+  <rect x="302" y="344" width="118" height="8" rx="4" fill="#ffffff" opacity="0.45"/>
+  <rect x="302" y="360" width="74" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+
+  <!-- ─── SPLIT DIVIDER LINE (vertical, centre) ─── -->
+  <!-- Glowing split line -->
+  <line x1="256" y1="88" x2="256" y2="424"
+        stroke="#FFD54F" stroke-width="3" stroke-linecap="round"
+        filter="url(#glow)" opacity="0.95"/>
+
+  <!-- Dashed overlay for "split" feel -->
+  <line x1="256" y1="88" x2="256" y2="424"
+        stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+        stroke-dasharray="10 8" opacity="0.5"/>
+
+  <!-- ─── SPLIT ARROWS ─── -->
+  <!-- Left arrow (pointing left) -->
+  <g filter="url(#glow)">
+    <polygon points="216,256 244,238 244,274" fill="url(#arrowGrad)" opacity="0.95"/>
+  </g>
+  <!-- Right arrow (pointing right) -->
+  <g filter="url(#glow)">
+    <polygon points="296,256 268,238 268,274" fill="url(#arrowGrad)" opacity="0.95"/>
+  </g>
+
+  <!-- ─── CONNECTOR LINES (left block → split, split → right blocks) ─── -->
+  <!-- Left block to split -->
+  <line x1="234" y1="256" x2="248" y2="256"
+        stroke="#FFD54F" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Split to right top block -->
+  <line x1="264" y1="256" x2="264" y2="176" 
+        stroke="#FFD54F" stroke-width="2" stroke-linecap="round" opacity="0" />
+  <!-- Elbow connectors from split line to right modules -->
+  <polyline points="264,176 278,176"
+        fill="none" stroke="#80DEEA" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <polyline points="264,336 278,336"
+        fill="none" stroke="#4DB6AC" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Small circle node on split line at top junction -->
+  <circle cx="264" cy="176" r="5" fill="#FFD54F" opacity="0.9" filter="url(#glow)"/>
+  <!-- Small circle node on split line at bottom junction -->
+  <circle cx="264" cy="336" r="5" fill="#FFD54F" opacity="0.9" filter="url(#glow)"/>
+  <!-- Centre node -->
+  <circle cx="256" cy="256" r="7" fill="#FFD54F" opacity="1" filter="url(#glow)"/>
+  <circle cx="256" cy="256" r="4" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Vertical segment connecting top & bottom junction on right side -->
+  <line x1="264" y1="176" x2="264" y2="336"
+        stroke="#FFD54F" stroke-width="2" stroke-linecap="round" opacity="0.5"
+        stroke-dasharray="6 5"/>
+
+</svg>
