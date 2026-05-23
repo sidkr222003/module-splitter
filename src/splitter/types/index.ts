@@ -35,6 +35,12 @@ export type Confidence =
 export type Severity = "critical" | "high" | "medium" | "low" | "info";
 export type ParseEngine = "typescript-ast" | "bracket-depth-fallback";
 export type HealthGrade = "S" | "A" | "B" | "C" | "D" | "F";
+export type SymbolUsageKind =
+  | "call"
+  | "type"
+  | "reexport"
+  | "inheritance"
+  | "reference";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Symbol Table — produced by the symbol resolver
@@ -101,6 +107,8 @@ export interface ASTRegion {
   localBindings: Set<string>;
   /** Names used inside this region — resolved against SymbolTable later */
   usedSymbols: Set<string>;
+  /** Usage context per symbol, used to distinguish call graph from symbol graph */
+  symbolUsageKinds?: Map<string, SymbolUsageKind[]>;
   /** JSDoc / leading comment text */
   leadingComment?: string;
   /** Nesting depth of brackets at deepest point (from parser) */
@@ -127,6 +135,7 @@ export interface DependencyEdge {
   from: string; // region id
   to: string; // region id
   symbols: string[]; // which symbols flow across this edge
+  edgeType: SymbolUsageKind; // call/type/reexport/inheritance/reference
   strength: number; // 0–1  (used for coupling score & partitioning)
   isTypeOnly: boolean; // only type imports → removable at runtime
   isCyclic: boolean;

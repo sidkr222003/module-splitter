@@ -215,8 +215,9 @@
     "typescript": "^5.4.0"
   },
   "devDependencies": {
+    "@types/d3-force": "^3.0.10",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.12.0",
+    "@types/node": "^20.19.41",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
@@ -233,7 +234,12 @@
       "**/__tests__/**/*.test.ts"
     ],
     "transform": {
-      "^.+\\.tsx?$": ["ts-jest", { "tsconfig": "__tests__/tsconfig.json" }]
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "__tests__/tsconfig.json"
+        }
+      ]
     },
     "collectCoverageFrom": [
       "src/**/*.ts",
@@ -247,8 +253,5 @@
         "statements": 69
       }
     }
-  },
-  "engines": {
-    "vscode": "^1.85.0"
   }
 }

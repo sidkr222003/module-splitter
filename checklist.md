@@ -14,7 +14,7 @@
 - [ ] B1 — Transitive symbol resolution (External coupling accuracy, M, Sprint 3)
 - [x] C2 — Weighted CC (Contextual accuracy, S, Sprint 3)
 - [ ] D4 — Test coverage signal (Coverage-driven alignment, L, Sprint 4)
-- [ ] B2 — Call graph vs symbol graph (8% class accuracy, L, Sprint 4)
+- [x] B2 — Call graph vs symbol graph (8% class accuracy, L, Sprint 4)
 - [ ] D2 — Git blame integration (Stability awareness, L, Sprint 4)
 - [ ] E3 — Dynamic import detection (Dynamic-import accuracy, M, Sprint 4)
 - [ ] D3 — Co-change detection (Hidden coupling, L, Sprint 5)

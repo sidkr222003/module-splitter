@@ -363,6 +363,44 @@ export function B() {
     expect(graph.inboundCouplingScores.get(b.id) ?? 0).toBeGreaterThan(0);
   });
 
+  it("distinguishes call, type, and inheritance edges", () => {
+    const src = `
+export class Base {}
+
+export class Derived extends Base {}
+
+export type BaseAlias = Base;
+
+export function instantiateBase() {
+  return new Base();
+}
+`.trim();
+
+    const { regions, symbolTable } = parseSourceFile(src, "graph.ts");
+    const graph = buildDependencyGraph(regions, symbolTable);
+
+    const derived = regions.find((r) => r.name === "Derived");
+    const alias = regions.find((r) => r.name === "BaseAlias");
+    const instantiateBase = regions.find((r) => r.name === "instantiateBase");
+    const base = regions.find((r) => r.name === "Base");
+
+    if (!derived || !alias || !instantiateBase || !base) return;
+
+    const edges = graph.edges.filter((edge) => edge.to === base.id);
+    const inheritanceEdge = edges.find((edge) => edge.from === derived.id);
+    const typeEdge = edges.find((edge) => edge.from === alias.id);
+    const callEdge = edges.find((edge) => edge.from === instantiateBase.id);
+
+    expect(inheritanceEdge?.edgeType).toBe("inheritance");
+    expect(typeEdge?.edgeType).toBe("type");
+    expect(callEdge?.edgeType).toBe("call");
+
+    expect(inheritanceEdge?.strength ?? 0).toBeGreaterThan(
+      callEdge?.strength ?? 0,
+    );
+    expect(callEdge?.strength ?? 0).toBeGreaterThan(typeEdge?.strength ?? 0);
+  });
+
   it("assigns cohesion scores to all regions", () => {
     const { regions, symbolTable } = parseSourceFile(
       SIMPLE_COMPONENT,

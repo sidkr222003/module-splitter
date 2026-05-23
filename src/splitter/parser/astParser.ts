@@ -26,6 +26,7 @@ import type {
   SymbolTable,
   SymbolEntry,
   ImportRecord,
+  SymbolUsageKind,
 } from "../types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,9 +122,72 @@ function containsAsync(node: ts.Node): boolean {
   return found;
 }
 
-/** Collect all identifier references used inside a node */
-function collectUsedSymbols(node: ts.Node, sf: ts.SourceFile): Set<string> {
+function isTypeContext(node: ts.Node): boolean {
+  return ts.isTypeNode(node) || ts.isExpressionWithTypeArguments(node);
+}
+
+function hasAncestor(
+  node: ts.Node,
+  predicate: (node: ts.Node) => boolean,
+): boolean {
+  let current: ts.Node | undefined = node.parent;
+  while (current) {
+    if (predicate(current)) return true;
+    current = current.parent;
+  }
+  return false;
+}
+
+function classifySymbolUsage(node: ts.Identifier): SymbolUsageKind {
+  if (hasAncestor(node, ts.isHeritageClause)) {
+    return "inheritance";
+  }
+
+  let current: ts.Node = node;
+
+  while (current.parent) {
+    const parent = current.parent;
+
+    if (ts.isPropertyAccessExpression(parent) && parent.name === current) {
+      return "reference";
+    }
+
+    if (ts.isExportSpecifier(parent)) {
+      return "reexport";
+    }
+
+    if (
+      (ts.isCallExpression(parent) || ts.isNewExpression(parent)) &&
+      parent.expression === current
+    ) {
+      return "call";
+    }
+
+    if (isTypeContext(parent)) {
+      return "type";
+    }
+
+    current = parent;
+  }
+
+  return "reference";
+}
+
+/** Collect identifier references and the context each one appears in */
+function collectSymbolUsages(node: ts.Node): {
+  usedSymbols: Set<string>;
+  symbolUsageKinds: Map<string, SymbolUsageKind[]>;
+} {
   const used = new Set<string>();
+  const kinds = new Map<string, Set<SymbolUsageKind>>();
+
+  const record = (text: string, kind: SymbolUsageKind): void => {
+    used.add(text);
+    const bucket = kinds.get(text) ?? new Set<SymbolUsageKind>();
+    bucket.add(kind);
+    kinds.set(text, bucket);
+  };
+
   const walk = (n: ts.Node): void => {
     if (ts.isIdentifier(n)) {
       const parent = n.parent;
@@ -132,14 +196,21 @@ function collectUsedSymbols(node: ts.Node, sf: ts.SourceFile): Set<string> {
         const text = n.text;
         if (text && !/^[a-z]{1,3}$/.test(text)) {
           // Skip tiny keywords/vars
-          used.add(text);
+          record(text, classifySymbolUsage(n));
         }
       }
     }
     ts.forEachChild(n, walk);
   };
+
   walk(node);
-  return used;
+
+  return {
+    usedSymbols: used,
+    symbolUsageKinds: new Map(
+      [...kinds.entries()].map(([name, value]) => [name, [...value]]),
+    ),
+  };
 }
 
 /** Collect all locally bound names in a function / block */
@@ -320,7 +391,7 @@ function nodeToRegion(
   const src = lines.join("\n");
   const exported = isExported(node);
   const leadingComment = extractLeadingComment(node, sf);
-  const usedSymbols = collectUsedSymbols(node, sf);
+  const { usedSymbols, symbolUsageKinds } = collectSymbolUsages(node);
   const localBindings = collectLocalBindings(node);
   const depth = maxBracketDepth(src);
 
@@ -334,6 +405,7 @@ function nodeToRegion(
     usedSymbols,
     localBindings,
     maxBracketDepth: depth,
+    symbolUsageKinds,
   };
 
   // ── Function declaration ──────────────────────────────────────────────────
@@ -684,7 +756,7 @@ export function parseSourceFile(
         const src = lines.join("\n");
         const exported = isExported(node);
         const leadingComment = extractLeadingComment(node, sf);
-        const usedSymbols = collectUsedSymbols(decl, sf);
+        const { usedSymbols, symbolUsageKinds } = collectSymbolUsages(decl);
         const localBindings = collectLocalBindings(decl);
         const depth = maxBracketDepth(src);
 
@@ -710,6 +782,7 @@ export function parseSourceFile(
             hasAsyncOps: containsAsync(decl),
             localBindings,
             usedSymbols,
+            symbolUsageKinds,
             maxBracketDepth: depth,
             leadingComment,
           });
@@ -733,6 +806,7 @@ export function parseSourceFile(
             hasAsyncOps: false,
             localBindings,
             usedSymbols,
+            symbolUsageKinds,
             maxBracketDepth: depth,
             leadingComment,
           });
@@ -754,6 +828,7 @@ export function parseSourceFile(
             hasAsyncOps: containsAsync(decl),
             localBindings,
             usedSymbols,
+            symbolUsageKinds,
             maxBracketDepth: depth,
             leadingComment,
           });

@@ -18,7 +18,31 @@ import type {
   SymbolTable,
   DependencyGraph,
   DependencyEdge,
+  SymbolUsageKind,
 } from "../types";
+
+const EDGE_TYPE_WEIGHT: Record<SymbolUsageKind, number> = {
+  call: 1.5,
+  type: 0.1,
+  reexport: 0,
+  inheritance: 2.0,
+  reference: 1.0,
+};
+
+const EDGE_TYPE_PRECEDENCE: SymbolUsageKind[] = [
+  "inheritance",
+  "call",
+  "reference",
+  "type",
+  "reexport",
+];
+
+function chooseEdgeType(symbolKinds: SymbolUsageKind[]): SymbolUsageKind {
+  for (const kind of EDGE_TYPE_PRECEDENCE) {
+    if (symbolKinds.includes(kind)) return kind;
+  }
+  return "reference";
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Edge builder
@@ -26,6 +50,7 @@ import type {
 
 function computeEdgeStrength(
   symbols: string[],
+  symbolKinds: SymbolUsageKind[],
   fromKind: string,
   toKind: string,
 ): number {
@@ -39,11 +64,25 @@ function computeEdgeStrength(
           : toKind === "type-block"
             ? 0.3 // type-only → low runtime coupling
             : 1.0;
-  const raw = Math.min(1, symbols.length * 0.2 * kindMultiplier);
+  const weighted = symbolKinds.reduce(
+    (total, kind) => total + 0.2 * kindMultiplier * EDGE_TYPE_WEIGHT[kind],
+    0,
+  );
+  const raw = Math.min(
+    1,
+    weighted > 0 ? weighted : symbols.length * 0.2 * kindMultiplier,
+  );
   return Math.round(raw * 100) / 100;
 }
 
-function isTypeOnlySymbols(symbols: string[], table: SymbolTable): boolean {
+function isTypeOnlySymbols(
+  symbols: string[],
+  table: SymbolTable,
+  symbolKinds: SymbolUsageKind[],
+): boolean {
+  if (symbolKinds.length > 0) {
+    return symbolKinds.every((kind) => kind === "type");
+  }
   return symbols.every((s) => {
     const entry = table.locals.get(s);
     return entry?.namespace === "type";
@@ -208,7 +247,10 @@ export function buildDependencyGraph(
 
   for (const region of regions) {
     // For each symbol used by this region, check if it's declared in another region
-    const usedByThis: Map<string, string[]> = new Map(); // targetId → symbols
+    const usedByThis: Map<
+      string,
+      { symbols: string[]; symbolKinds: SymbolUsageKind[] }
+    > = new Map(); // targetId → symbols
 
     for (const sym of region.usedSymbols) {
       // Skip locally bound names
@@ -221,25 +263,37 @@ export function buildDependencyGraph(
       const entry = symbolTable.locals.get(sym);
       if (!entry) continue;
 
-      const bucket = usedByThis.get(declId) ?? [];
-      bucket.push(sym);
+      const usageKinds = region.symbolUsageKinds?.get(sym) ?? ["reference"];
+      const bucket = usedByThis.get(declId) ?? {
+        symbols: [],
+        symbolKinds: [],
+      };
+      bucket.symbols.push(sym);
+      bucket.symbolKinds.push(...usageKinds);
       usedByThis.set(declId, bucket);
     }
 
-    for (const [targetId, symbols] of usedByThis) {
+    for (const [targetId, bucket] of usedByThis) {
       const fromRegion = regionById.get(region.id)!;
       const toRegion = regionById.get(targetId)!;
       const strength = computeEdgeStrength(
-        symbols,
+        bucket.symbols,
+        bucket.symbolKinds,
         fromRegion.kind,
         toRegion.kind,
       );
-      const typeOnly = isTypeOnlySymbols(symbols, symbolTable);
+      const edgeType = chooseEdgeType(bucket.symbolKinds);
+      const typeOnly = isTypeOnlySymbols(
+        bucket.symbols,
+        symbolTable,
+        bucket.symbolKinds,
+      );
 
       edges.push({
         from: region.id,
         to: targetId,
-        symbols,
+        symbols: bucket.symbols,
+        edgeType,
         strength,
         isTypeOnly: typeOnly,
         isCyclic: false,
