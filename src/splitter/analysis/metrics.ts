@@ -35,6 +35,43 @@ function count(src: string, re: RegExp): number {
   return (src.match(re) ?? []).length;
 }
 
+const isTokenKind = (kind: ts.SyntaxKind): boolean =>
+  kind >= ts.SyntaxKind.FirstToken && kind <= ts.SyntaxKind.LastToken;
+
+const forEachTokenCompat = (
+  sf: ts.SourceFile,
+  cb: (token: ts.Node) => void,
+): void => {
+  const tsWithForEachToken = ts as typeof ts & {
+    forEachToken?: (node: ts.Node, cb: (token: ts.Node) => void) => void;
+  };
+
+  if (typeof tsWithForEachToken.forEachToken === "function") {
+    tsWithForEachToken.forEachToken(sf, cb);
+    return;
+  }
+
+  const visit = (node: ts.Node): void => {
+    const children = node.getChildren(sf);
+    if (children.length === 0) {
+      if (isTokenKind(node.kind)) {
+        cb(node);
+      }
+      return;
+    }
+
+    for (const child of children) {
+      if (isTokenKind(child.kind)) {
+        cb(child);
+      } else {
+        visit(child);
+      }
+    }
+  };
+
+  visit(sf);
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Cyclomatic Complexity (McCabe)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -141,7 +178,7 @@ export function halsteadMetrics(src: string): HalsteadMetrics {
     hasJsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
 
-  ts.forEachToken(sf, (token) => {
+  forEachTokenCompat(sf, (token) => {
     if (ts.isIdentifier(token)) {
       add(operands, token.text);
       return;
