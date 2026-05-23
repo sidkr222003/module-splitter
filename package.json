@@ -3,19 +3,19 @@
   "displayName": "ASTra — Module Splitter",
   "description": "Automated, metrics-driven TypeScript/React module decomposition. Splits large files into well-structured modules with correct imports, test scaffolds, and dependency analysis.",
   "version": "3.0.0",
-  "publisher": "NK2552003",
+  "publisher": "BinaryGuild",
   "author": {
-    "name": "Nitish Kumar",
+    "name": "BinaryGuild",
     "email": "dev@nitish.world"
   },
   "license": "MIT",
-  "homepage": "https://github.com/NK2552003/astra-extension",
+  "homepage": "https://github.com/BinaryGuild/module-splitter",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NK2552003/astra-extension"
+    "url": "https://github.com/BinaryGuild/module-splitter"
   },
   "bugs": {
-    "url": "https://github.com/NK2552003/astra-extension/issues"
+    "url": "https://github.com/BinaryGuild/module-splitter/issues"
   },
   "icon": "assets/icon.png",
   "galleryBanner": {
