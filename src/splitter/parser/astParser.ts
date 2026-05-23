@@ -672,6 +672,96 @@ export function parseSourceFile(
   const regions: ASTRegion[] = [];
 
   ts.forEachChild(sf, (node) => {
+    // Special-case VariableStatement: if a single VariableStatement contains
+    // multiple declarators, emit one ASTRegion per declarator (multi-decl split).
+    if (ts.isVariableStatement(node)) {
+      for (const decl of node.declarationList.declarations) {
+        if (!ts.isIdentifier(decl.name)) continue;
+        const name = decl.name.text;
+        const startLine = lineOf(sf, decl.getStart(sf, true));
+        const endLine = lineOf(sf, decl.getEnd());
+        const lines = allLines.slice(startLine - 1, endLine);
+        const src = lines.join("\n");
+        const exported = isExported(node);
+        const leadingComment = extractLeadingComment(node, sf);
+        const usedSymbols = collectUsedSymbols(decl, sf);
+        const localBindings = collectLocalBindings(decl);
+        const depth = maxBracketDepth(src);
+
+        // Classify initializer types
+        const init = decl.initializer;
+        if (
+          init &&
+          (ts.isArrowFunction(init) || ts.isFunctionExpression(init))
+        ) {
+          const hasJSX = containsJSX(decl);
+          const hasHk = containsHookCalls(decl);
+          regions.push({
+            id: newId(name),
+            kind: classifyName(name, hasJSX, hasHk),
+            name,
+            startLine,
+            endLine,
+            lines,
+            isExported: exported,
+            isDefaultExport: false,
+            hasJSX,
+            hasHooks: hasHk,
+            hasAsyncOps: containsAsync(decl),
+            localBindings,
+            usedSymbols,
+            maxBracketDepth: depth,
+            leadingComment,
+          });
+        } else if (
+          init &&
+          (/^[A-Z_][A-Z0-9_]{2,}$/.test(name) ||
+            ts.isNumericLiteral(init) ||
+            ts.isStringLiteral(init))
+        ) {
+          regions.push({
+            id: newId(name),
+            kind: "constant-block",
+            name,
+            startLine,
+            endLine,
+            lines,
+            isExported: exported,
+            isDefaultExport: false,
+            hasJSX: false,
+            hasHooks: false,
+            hasAsyncOps: false,
+            localBindings,
+            usedSymbols,
+            maxBracketDepth: depth,
+            leadingComment,
+          });
+        } else {
+          // Generic variable binding — produce a utility-function style region
+          const hasJSX = containsJSX(decl);
+          const hasHk = containsHookCalls(decl);
+          regions.push({
+            id: newId(name),
+            kind: classifyName(name, hasJSX, hasHk),
+            name,
+            startLine,
+            endLine,
+            lines,
+            isExported: exported,
+            isDefaultExport: false,
+            hasJSX,
+            hasHooks: hasHk,
+            hasAsyncOps: containsAsync(decl),
+            localBindings,
+            usedSymbols,
+            maxBracketDepth: depth,
+            leadingComment,
+          });
+        }
+      }
+      return;
+    }
+
     const region = nodeToRegion(node, sf, allLines);
     if (region) regions.push(region);
   });
