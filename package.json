@@ -1,6 +1,6 @@
 {
-  "name": "astra-module-splitter",
-  "displayName": "ASTra — Module Splitter",
+  "name": "module-splitter",
+  "displayName": "Module Splitter",
   "description": "Automated, metrics-driven TypeScript/React module decomposition. Splits large files into well-structured modules with correct imports, test scaffolds, and dependency analysis.",
   "version": "3.0.0",
   "publisher": "BinaryGuild",
